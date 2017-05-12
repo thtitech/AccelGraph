@@ -11,6 +11,8 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 public class MainActivity extends Activity implements SensorEventListener {
 
     private final static String TAG = "MainActivity";
@@ -30,6 +32,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private float rate;
     private int accuracy;
     private long prevts;
+
+    private final static float alpha = 0.75F;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +78,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        vx = event.values[0];
-        vy = event.values[1];
-        vz = event.values[2];
+        vx = alpha * vx + (1 - alpha) * event.values[0];
+        vy = alpha * vy + (1 - alpha) * event.values[1];
+        vz = alpha * vz + (1 - alpha) * event.values[2];
         rate = ((float) (event.timestamp - prevts)) / (1000 * 1000);
         prevts = event.timestamp;
     }
@@ -93,8 +97,8 @@ public class MainActivity extends Activity implements SensorEventListener {
                 while (th != null) {
                     handler.post(new Runnable() {
                         public void run() {
-                            rateView.setText(Float.toString(rate));
-                            accuracyView.setText(Integer.toString(accuracy));
+                            rateView.setText(String.format(Locale.getDefault(), "%f", rate));
+                            accuracyView.setText(String.format(Locale.getDefault(), "%d", accuracy));
                             xView.addData(vx, true);
                             yView.addData(vy, true);
                             zView.addData(vz, true);
